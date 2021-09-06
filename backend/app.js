@@ -7,15 +7,13 @@ var logger = require('morgan');
 var stocksRouter = require('./routes/stocks');
 
 var getData = require('./lib/reader.js');
-var FSM = require('./lib/fsm.js');
+var fsm = require('./lib/fsm.js');
 
 var app = express();
 
 const data = getData();
-const fsm = new FSM();
 
 data.forEach((d) => fsm.appendData(d));
-console.log(fsm.processed_data);
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -32,15 +30,8 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
+  // render the error response
+  res.status(err.status || 500).json({ error: true, message: err.message })
 });
 
-module.exports = {
-  app,
-  fsm
-}
+module.exports = app;
